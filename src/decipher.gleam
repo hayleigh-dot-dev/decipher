@@ -780,3 +780,80 @@ pub fn keys(dynamic: Dynamic) -> Result(List(String), List(DecodeError)) {
   |> dynamic.dict(dynamic.string, dynamic.dynamic)
   |> result.map(dict.keys)
 }
+
+/// Decode a value at a given index. This decoder is permissive and will try to
+/// decode tuples, objects with string integer keys, and in the worst case will
+/// decode a list and index into that.
+///
+/// For strict tuple access, use the [`element`](https://hexdocs.pm/gleam_stdlib/gleam/dynamic.html#element)
+/// decoder from the standard library.
+///
+pub fn index(idx: Int, decoder: Decoder(a)) -> Decoder(a) {
+  dynamic.any([
+    dynamic.element(idx, decoder),
+    dynamic.field(int.to_string(idx), decoder),
+    index_list(idx, decoder),
+  ])
+}
+
+fn index_list(idx: Int, decoder: Decoder(a)) -> Decoder(a) {
+  fn(dynamic: Dynamic) {
+    use list <- result.try(dynamic.list(dynamic.dynamic)(dynamic))
+
+    case idx >= 0 {
+      True ->
+        list
+        |> list.drop(idx)
+        |> list.first
+        |> result.replace_error([
+          DecodeError(
+            expected: "A list with at least"
+              <> int.to_string(idx + 1)
+              <> "elements",
+            found: "A list with"
+              <> int.to_string(list.length(list))
+              <> "elements",
+            path: [int.to_string(idx)],
+          ),
+        ])
+        |> result.then(decoder)
+      False ->
+        Error([
+          DecodeError(
+            expected: "An 'index' decoder with a non-negative index",
+            found: int.to_string(idx),
+            path: [],
+          ),
+        ])
+    }
+  }
+}
+
+/// Decode a value at a given key path. This decoder is permissive and will use
+/// [`index`](#index) for any numeric string keys where possible.
+///
+pub fn at(path: List(String), decoder: Decoder(a)) -> Decoder(a) {
+  fn(dynamic: Dynamic) { do_at(path, decoder, dynamic) }
+}
+
+fn do_at(
+  path: List(String),
+  decoder: Decoder(a),
+  dynamic: Dynamic,
+) -> Result(a, List(DecodeError)) {
+  case path {
+    [] -> decoder(dynamic)
+    [head, ..rest] -> {
+      case int.parse(head) {
+        Ok(idx) ->
+          dynamic
+          |> index(idx, dynamic.dynamic)
+          |> result.then(do_at(rest, decoder, _))
+        Error(_) ->
+          dynamic
+          |> dynamic.field(head, dynamic.dynamic)
+          |> result.then(do_at(rest, decoder, _))
+      }
+    }
+  }
+}
