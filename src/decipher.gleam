@@ -1,6 +1,7 @@
 // IMPORTS ---------------------------------------------------------------------
 
 import birl.{type Time}
+import gleam/bit_array
 import gleam/dict
 import gleam/dynamic.{type DecodeError, type Decoder, type Dynamic, DecodeError}
 import gleam/float
@@ -129,7 +130,7 @@ pub fn bool_string(dynamic: Dynamic) -> Result(Bool, List(DecodeError)) {
 
 /// This decoder will decode a string and then confirm that it is not empty.
 ///
-pub fn nonempty_string(dynamic: Dynamic) -> Result(String, List(DecodeError)) {
+pub fn non_empty_string(dynamic: Dynamic) -> Result(String, List(DecodeError)) {
   use string <- result.try(dynamic.string(dynamic))
 
   case string {
@@ -188,7 +189,7 @@ pub fn exact_set(decoder: Decoder(a)) -> Decoder(Set(a)) {
 /// Decode a list or [arraylike](#arraylike) with at least one item into a `List`.
 /// If the incoming list is empty, decoding will fail.
 ///
-pub fn nonempty_list(decode: Decoder(a)) -> Decoder(List(a)) {
+pub fn non_empty_list(decode: Decoder(a)) -> Decoder(List(a)) {
   fn(dynamic: Dynamic) {
     use list <- result.try(dynamic.list(decode)(dynamic))
 
@@ -249,6 +250,190 @@ pub fn all(decoders: List(Decoder(a))) -> Decoder(List(a)) {
   }
 }
 
+// OBJECTS & TUPLES ------------------------------------------------------------
+
+/// Decode an object with exactly one field into some value. If additional fields
+/// are present, decoding will fail and the additional fields will be reported in
+/// the error.
+///
+pub fn exact_object1(
+  constructor: fn(a) -> b,
+  field1: #(String, Decoder(a)),
+) -> Decoder(b) {
+  let expected_keys = set.from_list([field1.0])
+
+  fn(dynamic: Dynamic) {
+    dynamic
+    |> dynamic.decode1(constructor, dynamic.field(field1.0, field1.1))
+    |> result.then(check_exact_object(_, expected_keys, dynamic))
+  }
+}
+
+/// Decode an object with exactly two fields into some value. If additional fields
+/// are present, decoding will fail and the additional fields will be reported in
+/// the error.
+///
+pub fn exact_object2(
+  constructor: fn(a, b) -> c,
+  field1: #(String, Decoder(a)),
+  field2: #(String, Decoder(b)),
+) -> Decoder(c) {
+  let expected_keys = set.from_list([field1.0])
+
+  fn(dynamic: Dynamic) {
+    dynamic
+    |> dynamic.decode2(
+      constructor,
+      dynamic.field(field1.0, field1.1),
+      dynamic.field(field2.0, field2.1),
+    )
+    |> result.then(check_exact_object(_, expected_keys, dynamic))
+  }
+}
+
+/// Decode an object with exactly three fields into some value. If additional fields
+/// are present, decoding will fail and the additional fields will be reported in
+/// the error.
+///
+pub fn exact_object3(
+  constructor: fn(a, b, c) -> d,
+  field1: #(String, Decoder(a)),
+  field2: #(String, Decoder(b)),
+  field3: #(String, Decoder(c)),
+) -> Decoder(d) {
+  let expected_keys = set.from_list([field1.0, field2.0, field3.0])
+
+  fn(dynamic: Dynamic) {
+    dynamic
+    |> dynamic.decode3(
+      constructor,
+      dynamic.field(field1.0, field1.1),
+      dynamic.field(field2.0, field2.1),
+      dynamic.field(field3.0, field3.1),
+    )
+    |> result.then(check_exact_object(_, expected_keys, dynamic))
+  }
+}
+
+/// Decode an object with exactly four fields into some value. If additional fields
+/// are present, decoding will fail and the additional fields will be reported in
+/// the error.
+///
+pub fn exact_object4(
+  constructor: fn(a, b, c, d) -> e,
+  field1: #(String, Decoder(a)),
+  field2: #(String, Decoder(b)),
+  field3: #(String, Decoder(c)),
+  field4: #(String, Decoder(d)),
+) -> Decoder(e) {
+  let expected_keys = set.from_list([field1.0, field2.0, field3.0, field4.0])
+
+  fn(dynamic: Dynamic) {
+    dynamic
+    |> dynamic.decode4(
+      constructor,
+      dynamic.field(field1.0, field1.1),
+      dynamic.field(field2.0, field2.1),
+      dynamic.field(field3.0, field3.1),
+      dynamic.field(field4.0, field4.1),
+    )
+    |> result.then(check_exact_object(_, expected_keys, dynamic))
+  }
+}
+
+/// Decode an object with exactly five fields into some value. If additional fields
+/// are present, decoding will fail and the additional fields will be reported in
+/// the error.
+///
+pub fn exact_object5(
+  constructor: fn(a, b, c, d, e) -> f,
+  field1: #(String, Decoder(a)),
+  field2: #(String, Decoder(b)),
+  field3: #(String, Decoder(c)),
+  field4: #(String, Decoder(d)),
+  field5: #(String, Decoder(e)),
+) -> Decoder(f) {
+  let expected_keys =
+    set.from_list([field1.0, field2.0, field3.0, field4.0, field5.0])
+
+  fn(dynamic: Dynamic) {
+    dynamic
+    |> dynamic.decode5(
+      constructor,
+      dynamic.field(field1.0, field1.1),
+      dynamic.field(field2.0, field2.1),
+      dynamic.field(field3.0, field3.1),
+      dynamic.field(field4.0, field4.1),
+      dynamic.field(field5.0, field5.1),
+    )
+    |> result.then(check_exact_object(_, expected_keys, dynamic))
+  }
+}
+
+/// Decode an object with exactly six fields into some value. If additional fields
+/// are present, decoding will fail and the additional fields will be reported in
+/// the error.
+///
+pub fn exact_object6(
+  constructor: fn(a, b, c, d, e, f) -> g,
+  field1: #(String, Decoder(a)),
+  field2: #(String, Decoder(b)),
+  field3: #(String, Decoder(c)),
+  field4: #(String, Decoder(d)),
+  field5: #(String, Decoder(e)),
+  field6: #(String, Decoder(f)),
+) -> Decoder(g) {
+  let expected_keys =
+    set.from_list([field1.0, field2.0, field3.0, field4.0, field5.0, field6.0])
+
+  fn(dynamic: Dynamic) {
+    dynamic
+    |> dynamic.decode6(
+      constructor,
+      dynamic.field(field1.0, field1.1),
+      dynamic.field(field2.0, field2.1),
+      dynamic.field(field3.0, field3.1),
+      dynamic.field(field4.0, field4.1),
+      dynamic.field(field5.0, field5.1),
+      dynamic.field(field6.0, field6.1),
+    )
+    |> result.then(check_exact_object(_, expected_keys, dynamic))
+  }
+}
+
+fn check_exact_object(
+  return: a,
+  expected: Set(String),
+  dynamic: Dynamic,
+) -> Result(a, List(DecodeError)) {
+  use keys <- result.try(keys(dynamic))
+
+  let found_keys = set.from_list(keys)
+  let difference = set.to_list(set.difference(found_keys, expected))
+
+  case list.is_empty(difference) {
+    True -> Ok(return)
+    False -> {
+      let expected_keys =
+        expected
+        |> set.to_list
+        |> string.join(", ")
+
+      let extra_keys =
+        difference
+        |> string.join(", ")
+
+      Error([
+        DecodeError(
+          expected: "An object with exactly these keys: " <> expected_keys,
+          found: "An object with these extra keys: " <> extra_keys,
+          path: [],
+        ),
+      ])
+    }
+  }
+}
+
 // CUSTOM TYPES ----------------------------------------------------------------
 
 /// There is no standard way to represent something like Gleam's custom types as
@@ -280,15 +465,15 @@ pub fn all(decoders: List(Decoder(a))) -> Decoder(List(a)) {
 /// ```
 ///
 pub fn tagged_union(
-  tag_decoder: Decoder(a),
+  tag: Decoder(a),
   variants: List(#(a, Decoder(b))),
 ) -> Decoder(b) {
   let switch = dict.from_list(variants)
 
   fn(dynamic: Dynamic) {
-    use tag <- result.try(tag_decoder(dynamic))
+    use kind <- result.try(tag(dynamic))
 
-    case dict.get(switch, tag) {
+    case dict.get(switch, kind) {
       Ok(decoder) -> decoder(dynamic)
       Error(_) -> {
         // We're going to report the possible tags as a TS-style union, so
@@ -305,7 +490,7 @@ pub fn tagged_union(
         // but honestly if they somehow succeed in decoding `Nil` then what are
         // they even playing at.
         //
-        let path = case tag_decoder(dynamic.from(Nil)) {
+        let path = case tag(dynamic.from(Nil)) {
           Error([DecodeError(path: path, ..), ..]) -> path
           _ -> []
         }
@@ -415,6 +600,63 @@ pub fn uri(dynamic: Dynamic) -> Result(Uri, List(DecodeError)) {
   }
 }
 
+/// Decode a string representing base16-encoded binary data into a `BitArray`.
+///
+pub fn base16(dynamic: Dynamic) -> Result(BitArray, List(DecodeError)) {
+  use string <- result.try(dynamic.string(dynamic))
+
+  case bit_array.base16_decode(string) {
+    Ok(bit_array) -> Ok(bit_array)
+    Error(_) ->
+      Error([
+        DecodeError(
+          expected: "A valid base16-encoded string",
+          found: string,
+          path: [],
+        ),
+      ])
+  }
+}
+
+/// Decode a string representing base64-encoded binary data into a `BitArray`.
+///
+pub fn base64(dynamic: Dynamic) -> Result(BitArray, List(DecodeError)) {
+  use string <- result.try(dynamic.string(dynamic))
+
+  case bit_array.base64_decode(string) {
+    Ok(bit_array) -> Ok(bit_array)
+    Error(_) ->
+      Error([
+        DecodeError(
+          expected: "A valid base64-encoded string",
+          found: string,
+          path: [],
+        ),
+      ])
+  }
+}
+
+/// Decode a string representing url-safe base64-encoded binary data into a
+/// `BitArray`.
+///
+pub fn base64_url_encoded(
+  dynamic: Dynamic,
+) -> Result(BitArray, List(DecodeError)) {
+  use string <- result.try(dynamic.string(dynamic))
+
+  case bit_array.base64_url_decode(string) {
+    Ok(bit_array) -> Ok(bit_array)
+    Error(_) ->
+      Error([
+        DecodeError(
+          expected: "A valid base64-url-encoded string",
+          found: string,
+          path: [],
+        ),
+      ])
+  }
+}
+
 // UTILITIES -------------------------------------------------------------------
 
 /// Run a decoder but only keep the result if it satisfies the given predicate.
@@ -469,4 +711,12 @@ pub fn json_string(decoder: Decoder(a)) -> Decoder(a) {
         ])
     }
   }
+}
+
+/// Decode just the keys of an object as a list of strings.
+///
+pub fn keys(dynamic: Dynamic) -> Result(List(String), List(DecodeError)) {
+  dynamic
+  |> dynamic.dict(dynamic.string, dynamic.dynamic)
+  |> result.map(dict.keys)
 }
