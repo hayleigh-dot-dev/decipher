@@ -1,7 +1,7 @@
 name = "decipher"
 version = "1.0.0"
 
-description = "A collection of handy decoders for gleam/dynamic."
+description = "A collection of handy gleam/dynamic decoders."
 licences = ["MIT"]
 repository = { type = "github", user = "hayleigh-dot-dev", repo = "decipher" }
 links = [
