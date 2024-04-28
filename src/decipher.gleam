@@ -13,6 +13,7 @@ import gleam/result
 import gleam/set.{type Set}
 import gleam/string
 import gleam/uri.{type Uri}
+import stoiridh/version.{type Version}
 
 // PRIMITIVES ------------------------------------------------------------------
 
@@ -630,6 +631,65 @@ pub fn base64(dynamic: Dynamic) -> Result(BitArray, List(DecodeError)) {
         DecodeError(
           expected: "A valid base64-encoded string",
           found: string,
+          path: [],
+        ),
+      ])
+  }
+}
+
+/// Decode a string representing a valid semantic version into a [`Version`](https://hexdocs.pm/stoiridh_version/stoiridh/version.html#Version)
+/// value from the stoiridh_version package.
+///
+pub fn semver(dynamic: Dynamic) -> Result(Version, List(DecodeError)) {
+  use string <- result.try(dynamic.string(dynamic))
+
+  case version.parse(string) {
+    Ok(version) -> Ok(version)
+    Error(version.InvalidVersion) | Error(version.NegativeValue(_)) ->
+      Error([
+        DecodeError(
+          expected: "A valid semantic version",
+          found: string,
+          path: [],
+        ),
+      ])
+    Error(version.InvalidMajorVersion) ->
+      Error([
+        DecodeError(
+          expected: "A valid semantic version",
+          found: "A semantic version with an invalid major version number",
+          path: [],
+        ),
+      ])
+    Error(version.InvalidMinorVersion) ->
+      Error([
+        DecodeError(
+          expected: "A valid semantic version",
+          found: "A semantic version with an invalid minor version number",
+          path: [],
+        ),
+      ])
+    Error(version.InvalidPatchVersion) ->
+      Error([
+        DecodeError(
+          expected: "A valid semantic version",
+          found: "A semantic version with an invalid patch version number",
+          path: [],
+        ),
+      ])
+    Error(version.InvalidPrerelease) ->
+      Error([
+        DecodeError(
+          expected: "A valid semantic version",
+          found: "A semantic version with an invalid prerelease",
+          path: [],
+        ),
+      ])
+    Error(version.InvalidBuildMetadata) ->
+      Error([
+        DecodeError(
+          expected: "A valid semantic version",
+          found: "A semantic version with invalid build metadata",
           path: [],
         ),
       ])
