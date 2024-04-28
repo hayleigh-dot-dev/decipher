@@ -1,0 +1,17 @@
+name = "decipher"
+version = "1.0.0"
+
+description = "A collection of handy decoders for gleam/dynamic."
+licences = ["MIT"]
+repository = { type = "github", user = "hayleigh-dot-dev", repo = "decipher" }
+links = [
+  { title = "Sponsor", href = "https://github.com/sponsors/hayleigh-dot-dev" },
+]
+
+[dependencies]
+gleam_stdlib = ">= 0.34.0 and < 2.0.0"
+gleam_json = ">= 1.0.1 and < 2.0.0"
+birl = ">= 1.6.1 and < 2.0.0"
+
+[dev-dependencies]
+gleeunit = ">= 1.0.0 and < 2.0.0"
