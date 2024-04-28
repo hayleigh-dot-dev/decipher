@@ -272,10 +272,10 @@ pub fn all(decoders: List(Decoder(a))) -> Decoder(List(a)) {
 ///   decipher.tagged_union(
 ///     dynamic.field("$", dynamic.string),
 ///     [
-///       dynamic.decode1(Wibble, dynamic.field("foo", dynamic.int)),
-///       dynamic.decode1(Wobble, dynamic.field("bar", dynamic.string)),
+///       #("wibble", dynamic.decode1(Wibble, dynamic.field("foo", dynamic.int))),
+///       #("wobble", dynamic.decode1(Wobble, dynamic.field("bar", dynamic.string))),
 ///     ]
-///   )
+///   )(dynamic)
 /// }
 /// ```
 ///
