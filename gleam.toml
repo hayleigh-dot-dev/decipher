@@ -1,11 +1,11 @@
 name = "decipher"
-version = "1.2.0"
+version = "1.2.1"
 
 description = "A collection of handy gleam/dynamic decoders."
 licences = ["MIT"]
 repository = { type = "github", user = "hayleigh-dot-dev", repo = "decipher" }
 links = [
-  { title = "Sponsor", href = "https://github.com/sponsors/hayleigh-dot-dev" },
+    { title = "Sponsor", href = "https://github.com/sponsors/hayleigh-dot-dev" },
 ]
 
 [dependencies]
