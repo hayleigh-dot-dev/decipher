@@ -10,7 +10,7 @@ links = [
 
 [dependencies]
 gleam_stdlib = ">= 0.34.0 and < 2.0.0"
-gleam_json = ">= 1.0.1 and < 2.0.0"
+gleam_json = ">= 1.0.1 and < 3.0.0"
 birl = ">= 1.6.1 and < 2.0.0"
 stoiridh_version = ">= 0.1.0 and < 1.0.0"
 
