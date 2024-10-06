@@ -1,6 +1,6 @@
 # decipher
 
-[![Package Version](https://img.shields.io/hexpm/v/modem)](https://hex.pm/packages/decipher)
+[![Package Version](https://img.shields.io/hexpm/v/decipher)](https://hex.pm/packages/decipher)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/decipher/)
 
 > **decipher**: to discover the meaning of something written badly or in a difficult
