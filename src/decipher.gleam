@@ -497,7 +497,7 @@ pub fn tagged_union(
         }
 
         Error([
-          DecodeError(expected: tags, found: string.inspect(tag), path: path),
+          DecodeError(expected: tags, found: string.inspect(kind), path: path),
         ])
       }
     }
